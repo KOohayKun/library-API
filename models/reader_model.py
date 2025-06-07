@@ -12,3 +12,6 @@ class Reader(ReaderBase):
     id: int
     is_active: Optional[bool] = True
 
+class ReaderUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
