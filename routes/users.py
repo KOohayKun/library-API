@@ -8,7 +8,7 @@ from Library.datab.dbmodels import Reader
 from Library.datab.database import get_db
 from Library.utils.security import hash_password, create_access_token, verify_password
 
-router = APIRouter(tags=["users"])
+router = APIRouter(prefix="/users")
 access_token_expire_minutes = 30
 
 class Message(BaseModel):

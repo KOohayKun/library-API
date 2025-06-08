@@ -1,14 +1,30 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from Library.models.reader_model import Reader as ReaderModel
+from Library.models.reader_model import ReaderCreate, Reader as ReaderModel
 from Library.datab.dbmodels import Reader as ReaderDB
 from Library.datab.database import get_db
-from Library.utils.security import get_current_user
+from Library.utils.security import get_current_user, hash_password
 from Library.models.user_model import User
-from typing import List, Optional
+from typing import List
 from Library.models.reader_model import ReaderUpdate
 
 router = APIRouter(prefix="/readers", tags=["reader"])
+
+@router.post("/", response_model=ReaderModel)
+def create_reader(reader: ReaderCreate, db: Session = Depends(get_db)):
+    new_reader = ReaderDB(
+        name=reader.name,
+        email=reader.email,
+        hashed_password=hash_password(reader.password)
+    )
+    db.add(new_reader)
+    db.commit()
+    db.refresh(new_reader)
+    return ReaderModel(
+        id=new_reader.id,
+        name=new_reader.name,
+        email=new_reader.email
+    )
 
 @router.get("/{id}", response_model=ReaderModel)
 def get_reader(id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
@@ -19,7 +35,7 @@ def get_reader(id: int, db: Session = Depends(get_db), _: User = Depends(get_cur
     return ReaderModel(
         id=reader.id,
         name=reader.name,
-        email=reader.email
+        email=reader.email_librarian
     )
 
 @router.get("/", response_model=List[ReaderModel])
@@ -51,7 +67,7 @@ def update_reader(id: int, reader_update: ReaderUpdate,
     return ReaderModel(
         id=reader.id,
         name=reader.name,
-        email=reader.email
+        email=reader.email_librarian
     )
 
 @router.delete("/{id}")

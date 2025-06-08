@@ -29,8 +29,9 @@ def borrow_book(request: BorrowRequest, db: Session = Depends(get_db)):
 
     active_borrows = db.query(BorrowedBook).filter(
         BorrowedBook.reader_id == request.reader_id,
-        BorrowedBook.return_date is None
+        BorrowedBook.return_date.is_(None)
     ).count()
+
     if active_borrows >= 3:
         raise HTTPException(status_code=400, detail="Читатель уже имеет максимум книг (3шт.)")
 
